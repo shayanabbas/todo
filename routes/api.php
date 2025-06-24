@@ -1,3 +1,5 @@
+<?php
+
 use App\Http\Controllers\Api\TaskController;
 
 Route::middleware('auth:sanctum')->group(function () {
