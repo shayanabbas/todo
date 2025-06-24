@@ -131,4 +131,15 @@ class TaskController extends Controller
 
         return response()->json(['message' => 'Task deleted.']);
     }
+
+    // Fetch the full task tree for the authenticated user
+    public function tasksTree()
+    {
+        $tasks = Task::where('user_id', Auth::id())
+            ->whereNull('parent_id')
+            ->with(['childrenRecursive'])
+            ->get();
+
+        return response()->json($tasks);
+    }
 }
