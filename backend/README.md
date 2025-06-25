@@ -1,61 +1,175 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Laravel Backend API
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+This is the **backend API** for the Todo App, built with Laravel 12 and designed to be used as a RESTful service for a standalone frontend (such as a Vue 3 SPA).
 
-## About Laravel
+---
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+## Features
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- **User Authentication** (token-based, via Laravel Sanctum)
+- **Task Management** (CRUD for tasks)
+- **Recursive Task Hierarchy** (parent-child relationships)
+- **RESTful API** endpoints only (no web views)
+- **PostgreSQL** (or SQLite) support
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+---
 
-## Learning Laravel
+## Requirements
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+- PHP 8.2+
+- Composer
+- Node.js (for development assets, optional)
+- PostgreSQL (or SQLite for local development)
+- DDEV (recommended for local dev, but not required)
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+---
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+## Setup Instructions
 
-## Laravel Sponsors
+### 1. Clone the Repository
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+```sh
+git clone <your-repo-url>
+cd backend
+```
 
-### Premium Partners
+### 2. Install PHP Dependencies
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+```sh
+composer install
+```
 
-## Contributing
+### 3. Environment Configuration
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+Copy the example environment file and edit as needed:
 
-## Code of Conduct
+```sh
+cp .env.example .env
+```
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+- Set your database connection (PostgreSQL or SQLite) in `.env`:
+  - For SQLite (default):  
+    ```
+    DB_CONNECTION=sqlite
+    DB_DATABASE=/absolute/path/to/backend/database/database.sqlite
+    ```
+  - For PostgreSQL:
+    ```
+    DB_CONNECTION=pgsql
+    DB_HOST=127.0.0.1
+    DB_PORT=5432
+    DB_DATABASE=your_db
+    DB_USERNAME=your_user
+    DB_PASSWORD=your_password
+    ```
 
-## Security Vulnerabilities
+- Generate the application key:
+  ```sh
+  php artisan key:generate
+  ```
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+### 4. Run Migrations
+
+```sh
+php artisan migrate
+```
+
+This will create the necessary tables for users, tasks, and personal access tokens.
+
+### 5. (Optional) Seed the Database
+
+If you have seeders, run:
+
+```sh
+php artisan db:seed
+```
+
+### 6. Run the Application
+
+#### With DDEV (recommended)
+
+From the project root:
+
+```sh
+ddev start
+ddev ssh
+php artisan serve --host=0.0.0.0 --port=8080
+```
+
+Your API will be available at `http://localhost:8080` (or the DDEV-provided URL).
+
+#### Without DDEV
+
+```sh
+php artisan serve
+```
+
+---
+
+## API Endpoints
+
+All endpoints (except `/api/login`) require authentication via a Bearer token.
+
+### **Authentication**
+
+- `POST /api/login`
+  - Body: `{ "email": "user@example.com", "password": "password" }`
+  - Response: `{ "token": "..." }`
+
+### **Tasks**
+
+- `GET /api/tasks` — List all tasks for the authenticated user
+- `POST /api/tasks` — Create a new task
+- `GET /api/tasks/{id}` — Get a single task
+- `PUT /api/tasks/{id}` — Update a task
+- `DELETE /api/tasks/{id}` — Delete a task
+- `GET /api/tasks-tree` — Get the full recursive task tree for the user
+
+**All requests (except login) require:**
+```
+Authorization: Bearer <token>
+```
+
+---
+
+## Database Schema
+
+### **tasks**
+
+| Field       | Type      | Description                        |
+|-------------|-----------|------------------------------------|
+| id          | bigint    | Primary key                        |
+| user_id     | bigint    | Foreign key to users               |
+| parent_id   | bigint    | Nullable, parent task (recursive)  |
+| title       | string    | Task title                         |
+| description | text      | Task description (nullable)        |
+| priority    | enum      | 'high', 'medium', 'low' (default)  |
+| label       | string    | Optional label                     |
+| completed   | boolean   | Task completion status             |
+| timestamps  |           | created_at, updated_at             |
+
+---
+
+## Development
+
+- **Testing:**  
+  Run tests with:
+  ```sh
+  php artisan test
+  ```
+
+- **API Docs:**  
+  See the routes in `routes/api.php`.
+
+---
+
+## Notes
+
+- This backend is **API-only**. No web views are provided.
+- Use a separate frontend (e.g., Vue 3 SPA) to interact with this API.
+
+---
 
 ## License
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+MIT
