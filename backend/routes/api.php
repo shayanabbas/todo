@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\TaskController;
+use App\Http\Controllers\Auth\RegisteredUserController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -28,3 +29,5 @@ Route::post('/login', function (Request $request) {
 
     return response()->json(['token' => $token]);
 });
+
+Route::post('/register', [RegisteredUserController::class, 'store']);
