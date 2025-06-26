@@ -4,6 +4,7 @@ import InputLabel from '@/Components/InputLabel.vue';
 import PrimaryButton from '@/Components/PrimaryButton.vue';
 import TextInput from '@/Components/TextInput.vue';
 import { Link, useForm, usePage } from '@inertiajs/vue3';
+import { ref } from 'vue';
 
 defineProps({
     mustVerifyEmail: {
@@ -19,7 +20,24 @@ const user = usePage().props.auth.user;
 const form = useForm({
     name: user.name,
     email: user.email,
+    profile_image: null,
 });
+
+const imagePreview = ref(user.profile_image_url || null);
+
+function handleImageChange(e) {
+    const file = e.target.files[0];
+    form.profile_image = file;
+    if (file) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            imagePreview.value = event.target.result;
+        };
+        reader.readAsDataURL(file);
+    } else {
+        imagePreview.value = user.profile_image_url || null;
+    }
+}
 </script>
 
 <template>
@@ -35,7 +53,7 @@ const form = useForm({
         </header>
 
         <form
-            @submit.prevent="form.patch(route('profile.update'))"
+            @submit.prevent="form.submit('post', route('profile.update'), { forceFormData: true })"
             class="mt-6 space-y-6"
         >
             <div>
@@ -67,6 +85,21 @@ const form = useForm({
                 />
 
                 <InputError class="mt-2" :message="form.errors.email" />
+            </div>
+
+            <div>
+                <InputLabel for="profile_image" value="Profile Image" />
+                <input
+                    id="profile_image"
+                    type="file"
+                    class="mt-1 block w-full"
+                    accept="image/*"
+                    @change="handleImageChange"
+                />
+                <InputError class="mt-2" :message="form.errors.profile_image" />
+                <div v-if="imagePreview" class="mt-2">
+                    <img :src="imagePreview" alt="Profile Preview" class="h-20 w-20 rounded-full object-cover border" />
+                </div>
             </div>
 
             <div v-if="mustVerifyEmail && user.email_verified_at === null">
