@@ -25,9 +25,28 @@ class ProfileController extends Controller
     }
 
     /**
+     * Show the user's profile (API).
+     */
+    public function show(Request $request)
+    {
+        $user = $request->user();
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'profile_image' => $user->profile_image,
+                // add more fields as needed
+            ]);
+        }
+        // fallback for web (not used, but for safety)
+        return $this->edit($request);
+    }
+
+    /**
      * Update the user's profile information.
      */
-    public function update(ProfileUpdateRequest $request): RedirectResponse
+    public function update(ProfileUpdateRequest $request)
     {
         $user = $request->user();
 
@@ -45,6 +64,15 @@ class ProfileController extends Controller
         }
 
         $user->save();
+
+        if ($request->expectsJson() || $request->is('api/*')) {
+            return response()->json([
+                'id' => $user->id,
+                'name' => $user->name,
+                'email' => $user->email,
+                'profile_image' => $user->profile_image,
+            ]);
+        }
 
         return Redirect::route('profile.edit');
     }

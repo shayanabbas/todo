@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ProfileController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -12,6 +13,12 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::put('/tasks/{task}', [TaskController::class, 'update']);
     Route::delete('/tasks/{task}', [TaskController::class, 'destroy']);
     Route::get('/tasks-tree', [TaskController::class, 'tasksTree']);
+    Route::get('/profile', [ProfileController::class, 'show']);
+    Route::post('/profile', [ProfileController::class, 'update']);
+    Route::post('/logout', function (\Illuminate\Http\Request $request) {
+        $request->user()->currentAccessToken()->delete();
+        return response()->json(['message' => 'Logged out']);
+    });
 });
 
 Route::post('/login', function (Request $request) {
