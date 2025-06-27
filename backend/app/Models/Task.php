@@ -14,8 +14,12 @@ class Task extends Model
         'title',
         'description',
         'priority',
-        'label',
+        'labels',
         'completed',
+    ];
+
+    protected $casts = [
+        'labels' => 'array',
     ];
 
     public function user(): BelongsTo

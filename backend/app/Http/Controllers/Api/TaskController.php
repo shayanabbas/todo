@@ -17,8 +17,8 @@ class TaskController extends Controller
         $query = Task::where('user_id', Auth::id());
 
         // Optional: filter by label, priority, or parent_id
-        if ($request->has('label')) {
-            $query->where('label', $request->label);
+        if ($request->has('labels')) {
+            $query->whereJsonContains('labels', $request->labels);
         }
         if ($request->has('priority')) {
             $query->where('priority', $request->priority);
@@ -42,7 +42,8 @@ class TaskController extends Controller
             'title' => 'required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'nullable|in:high,medium,low',
-            'label' => 'nullable|string|max:255',
+            'labels' => 'nullable|array',
+            'labels.*' => 'string|max:255',
             'parent_id' => 'nullable|exists:tasks,id',
             'completed' => 'nullable|boolean',
         ]);
@@ -63,7 +64,7 @@ class TaskController extends Controller
             'title' => $validated['title'],
             'description' => $validated['description'] ?? null,
             'priority' => $validated['priority'] ?? 'medium',
-            'label' => $validated['label'] ?? null,
+            'labels' => $validated['labels'] ?? [],
             'completed' => $validated['completed'] ?? false,
         ]);
 
@@ -98,7 +99,8 @@ class TaskController extends Controller
             'title' => 'sometimes|required|string|max:255',
             'description' => 'nullable|string',
             'priority' => 'nullable|in:high,medium,low',
-            'label' => 'nullable|string|max:255',
+            'labels' => 'nullable|array',
+            'labels.*' => 'string|max:255',
             'parent_id' => 'nullable|exists:tasks,id',
             'completed' => 'nullable|boolean',
         ]);
