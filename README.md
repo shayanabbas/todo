@@ -29,7 +29,7 @@ todoapp/
 ### 1. Clone the Repository
 
 ```bash
-git clone <your-repo-url>
+git clone https://github.com/shayanabbas/todo.git
 cd todoapp
 ```
 

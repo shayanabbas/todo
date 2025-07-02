@@ -29,7 +29,7 @@ This is the **backend API** for the Todo App, built with Laravel 12 and designed
 ### 1. Clone the Repository
 
 ```sh
-git clone <your-repo-url>
+git clone https://github.com/shayanabbas/todo.git
 cd backend
 ```
 
