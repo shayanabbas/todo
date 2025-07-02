@@ -1,22 +1,34 @@
 <script setup>
 import { ref } from 'vue';
+import { useUserStore } from '../stores/user';
+import { RouterLink, useRouter } from 'vue-router';
+
 const props = defineProps({
-  compact: Boolean,
+  compact: Boolean, // If true, only show avatar (for Topbar)
   placement: {
     type: String,
     default: 'top-right',
   },
 });
+const emit = defineEmits(['logout']);
+const user = useUserStore();
 const showDropdown = ref(false);
-const user = {
-  name: 'Jane Doe',
-  email: 'jane@example.com',
-  profileImageUrl: 'https://i.pravatar.cc/100?img=1',
-};
-function toggleDropdown() { showDropdown.value = !showDropdown.value; }
-function closeDropdown() { showDropdown.value = false; }
-function handleLogout() { closeDropdown(); }
-function goToSettings() { closeDropdown(); }
+const router = useRouter();
+
+function toggleDropdown() {
+  showDropdown.value = !showDropdown.value;
+}
+function closeDropdown() {
+  showDropdown.value = false;
+}
+function handleLogout() {
+  emit('logout');
+  closeDropdown();
+}
+function goToSettings() {
+  closeDropdown();
+  router.push('/settings');
+}
 </script>
 
 <template>
@@ -40,7 +52,7 @@ function goToSettings() { closeDropdown(); }
         props.placement === 'bottom' ? 'right-0 top-full' : 'right-0 bottom-full'
       ]"
     >
-      <a href="#" @click.prevent="goToSettings" class="block px-4 py-2 text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Settings</a>
+      <RouterLink to="/settings" @click="closeDropdown" class="block px-4 py-2 text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-t-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Settings</RouterLink>
       <button @click="handleLogout" class="block w-full text-left px-4 py-2 text-gray-700 dark:text-gray-100 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-b-lg focus:outline-none focus-visible:ring-2 focus-visible:ring-blue-500">Logout</button>
     </div>
   </div>

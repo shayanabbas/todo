@@ -1,6 +1,6 @@
 <script setup>
 import TaskCard from './TaskCard.vue';
-import { defineProps } from 'vue';
+import { defineProps, defineEmits } from 'vue';
 
 const props = defineProps({
   tasks: {
@@ -12,6 +12,17 @@ const props = defineProps({
     default: false,
   },
 });
+const emit = defineEmits(['edit', 'complete', 'delete']);
+
+function handleEdit(task) {
+  emit('edit', task);
+}
+function handleComplete(task) {
+  emit('complete', task);
+}
+function handleDelete(task) {
+  emit('delete', task);
+}
 </script>
 
 <template>
@@ -29,6 +40,9 @@ const props = defineProps({
         v-for="task in tasks"
         :key="task.id"
         :task="task"
+        @edit="handleEdit"
+        @complete="handleComplete"
+        @delete="handleDelete"
       />
     </div>
   </div>

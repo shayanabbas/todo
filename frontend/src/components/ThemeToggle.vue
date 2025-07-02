@@ -1,7 +1,13 @@
 <script setup>
-import { ref } from 'vue';
-const isDark = ref(false);
-function toggleTheme() { isDark.value = !isDark.value; }
+import { computed } from 'vue';
+import { useThemeStore } from '../stores/theme';
+
+const themeStore = useThemeStore();
+const isDark = computed(() => themeStore.theme === 'dark');
+
+function toggleTheme() {
+  themeStore.toggleTheme();
+}
 </script>
 
 <template>

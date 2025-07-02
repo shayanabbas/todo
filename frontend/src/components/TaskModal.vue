@@ -1,10 +1,10 @@
 <template>
     <div v-if="visible" class="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50">
       <div class="bg-white dark:bg-gray-900 rounded-xl shadow-xl p-8 w-full max-w-md relative dark:text-gray-100">
-        <button @click="visible = false" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
+        <button @click="$emit('close')" class="absolute top-3 right-3 text-gray-400 hover:text-gray-700 dark:hover:text-gray-200">
           <Icon icon="material-symbols:close" class="w-6 h-6" />
         </button>
-        <h2 class="text-xl font-bold mb-4">Add New Task</h2>
+        <h2 class="text-xl font-bold mb-4">{{ isEdit ? 'Edit Task' : 'Add New Task' }}</h2>
         <form @submit.prevent="onSubmit" class="flex flex-col gap-4">
           <div>
             <label class="block text-sm font-medium mb-1 text-gray-800 dark:text-gray-100">Title</label>
@@ -43,9 +43,11 @@
               <option value="low">Low</option>
             </select>
           </div>
-          <button type="submit" class="bg-blue-700 text-white font-semibold py-2 rounded hover:bg-blue-800">
-            Add Task
+          <button type="submit" :disabled="loading" class="bg-blue-700 text-white font-semibold py-2 rounded hover:bg-blue-800 disabled:bg-blue-300 disabled:opacity-80">
+            <span v-if="loading">{{ isEdit ? 'Saving...' : 'Adding...' }}</span>
+            <span v-else>{{ isEdit ? 'Save Changes' : 'Add Task' }}</span>
           </button>
+          <div v-if="error" class="text-red-500 text-sm">{{ error }}</div>
         </form>
       </div>
     </div>
@@ -53,15 +55,54 @@
   
   <script setup>
   import { Icon } from '@iconify/vue';
-  import { ref } from 'vue';
+  import { ref, watch, defineProps, defineEmits, computed } from 'vue';
   
-  const visible = ref(true);
-  const title = ref('Sample Task');
-  const labels = ref(['feature', 'urgent']);
+  const props = defineProps({
+    visible: Boolean,
+    loading: Boolean,
+    error: String,
+    initial: Object,
+  });
+  
+  const emit = defineEmits(['close', 'submit']);
+  
+  const title = ref('');
+  const labels = ref([]);
   const labelInput = ref('');
-  const description = ref('This is a sample task description.');
+  const description = ref('');
   const priority = ref('medium');
   
+  const isEdit = computed(() => props.initial && !!props.initial.id);
+  
+  function setFieldsFromInitial() {
+    const initial = props.initial || {};
+    title.value = initial.title || '';
+    labels.value = Array.isArray(initial.labels) ? [...initial.labels] : [];
+    description.value = initial.description || '';
+    priority.value = initial.priority || 'medium';
+    labelInput.value = '';
+  }
+  
+  // Immediately set fields on mount if visible and initial are set
+  if (props.visible && props.initial) {
+    setFieldsFromInitial();
+  }
+  
+  // Watch for modal open
+  watch(() => props.visible, (val) => {
+    if (val) {
+      setFieldsFromInitial();
+    }
+  });
+  
+  // Watch for initial prop change (e.g., when editing a different task)
+  watch(() => props.initial, (val) => {
+    if (props.visible && val) {
+      setFieldsFromInitial();
+    }
+  }, { deep: true });
+  
+  // Add label from input (called on Enter, comma, or blur)
   function addLabelFromInput() {
     const val = labelInput.value.trim();
     if (val && !labels.value.includes(val)) {
@@ -69,13 +110,26 @@
     }
     labelInput.value = '';
   }
+  // Remove label by index
   function removeLabel(idx) {
     labels.value.splice(idx, 1);
   }
+  
+  // On submit, add any pending input as a label, then emit
   function onSubmit() {
-    // Just close modal for template
-    visible.value = false;
+    addLabelFromInput(); // Ensure any input is added as a tag
+    const payload = {
+      title: title.value,
+      labels: [...labels.value],
+      description: description.value,
+      priority: priority.value,
+    };
+    if (props.initial && props.initial.id) {
+      payload.id = props.initial.id;
+    }
+    emit('submit', payload);
   }
+  
   function onLabelInputKeydown(e) {
     if (e.key === 'Enter' || e.key === ',') {
       e.preventDefault();

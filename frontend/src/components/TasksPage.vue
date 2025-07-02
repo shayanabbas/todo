@@ -1,34 +1,80 @@
 <template>
   <div class="flex-1 bg-gray-100 dark:bg-gray-900 dark:text-gray-100 min-h-[calc(100vh-4rem)] p-8">
     <!-- Add Task Modal -->
-    <TaskModal :visible="showAddModal" @close="closeAddModal" />
+    <TaskModal
+      :visible="showAddModal"
+      :loading="addLoading"
+      :error="addError"
+      :initial="addForm"
+      @close="closeAddModal"
+      @submit="handleAddTaskSubmit"
+    />
+    <!-- Edit Task Modal -->
+    <TaskModal
+      v-if="editTask"
+      :key="editTask?.id"
+      :visible="!!editTask"
+      :loading="editLoading"
+      :error="editError"
+      :initial="editTask"
+      @close="closeEditModal"
+      @submit="handleEditTaskSubmit"
+    />
     <div class="flex justify-between items-center mb-8">
       <h2 class="text-2xl font-bold">Upcoming tasks</h2>
-      <button @click="openAddModal" class="bg-blue-700 text-white font-semibold py-2 px-4 rounded hover:bg-blue-800">Add Task</button>
     </div>
-    <TaskList :tasks="upcomingTasks" />
+    <TaskList
+      :tasks="upcomingTasks"
+      @edit="openEditModal"
+      @complete="taskStore.toggleComplete"
+      @delete="taskStore.deleteTask"
+    />
     <div class="mt-12">
       <h2 class="text-2xl font-bold mb-4">Completed tasks</h2>
-      <TaskList :tasks="completedTasks" />
+      <TaskList
+        :tasks="completedTasks"
+        @edit="openEditModal"
+        @complete="taskStore.toggleComplete"
+        @delete="taskStore.deleteTask"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
-import { ref, computed } from 'vue';
+import { ref, computed, onMounted } from 'vue';
+import { useTaskStore } from '../stores/task';
+import TaskCard from './TaskCard.vue';
 import TaskModal from './TaskModal.vue';
+import { Icon } from '@iconify/vue';
 import TaskList from './TaskList.vue';
+import { useTaskModal } from '../composables/useTaskModal';
 
-const showAddModal = ref(false);
-function openAddModal() { showAddModal.value = true; }
-function closeAddModal() { showAddModal.value = false; }
+const taskStore = useTaskStore();
+const { loading, error } = taskStore.getAsyncState();
+const tasks = taskStore.tasks;
 
-// Sample tasks
-const tasks = [
-  { id: 1, title: 'Sample Task 1', labels: ['feature'], description: 'Description 1', priority: 'high', completed: false },
-  { id: 2, title: 'Sample Task 2', labels: ['bug'], description: 'Description 2', priority: 'medium', completed: false },
-  { id: 3, title: 'Sample Task 3', labels: ['urgent'], description: 'Description 3', priority: 'low', completed: true },
-];
+const {
+  showAddModal,
+  addLoading,
+  addError,
+  addForm,
+  openAddModal,
+  closeAddModal,
+  handleAddTaskSubmit,
+  editTask,
+  editLoading,
+  editError,
+  openEditModal,
+  closeEditModal,
+  handleEditTaskSubmit,
+} = useTaskModal(taskStore);
+
+onMounted(() => {
+  if (!tasks.length && !loading.value) taskStore.fetchTasks();
+});
+
+// Computed lists for upcoming and completed tasks
 const upcomingTasks = computed(() => tasks.filter(t => !t.completed));
 const completedTasks = computed(() => tasks.filter(t => t.completed));
 </script>
