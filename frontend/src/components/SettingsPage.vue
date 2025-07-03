@@ -28,7 +28,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, watchEffect } from 'vue';
 import { useUserStore } from '../stores/user';
 
 const user = useUserStore();
@@ -42,6 +42,11 @@ const success = ref(false);
 
 onMounted(() => {
   if (!user.name) user.fetchProfile();
+});
+
+watchEffect(() => {
+  name.value = user.name;
+  email.value = user.email;
 });
 
 function handleFileChange(e) {

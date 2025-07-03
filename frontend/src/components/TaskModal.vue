@@ -71,6 +71,7 @@
   const labelInput = ref('');
   const description = ref('');
   const priority = ref('medium');
+  const parent_id = ref(null);
   
   const isEdit = computed(() => props.initial && !!props.initial.id);
   
@@ -80,6 +81,7 @@
     labels.value = Array.isArray(initial.labels) ? [...initial.labels] : [];
     description.value = initial.description || '';
     priority.value = initial.priority || 'medium';
+    parent_id.value = initial.parent_id || null;
     labelInput.value = '';
   }
   
@@ -123,6 +125,7 @@
       labels: [...labels.value],
       description: description.value,
       priority: priority.value,
+      parent_id: parent_id.value,
     };
     if (props.initial && props.initial.id) {
       payload.id = props.initial.id;

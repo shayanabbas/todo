@@ -36,7 +36,9 @@ export function useTaskModal(taskStore) {
         description: form.description,
         priority: form.priority,
         completed: false,
+        ...(form.parent_id ? { parent_id: form.parent_id } : {}),
       });
+      await taskStore.fetchTaskTree();
       closeAddModal();
     });
   }
