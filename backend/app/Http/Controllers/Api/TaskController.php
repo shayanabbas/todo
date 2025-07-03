@@ -28,7 +28,7 @@ class TaskController extends Controller
         }
 
         // Optionally eager load children for hierarchy
-        $tasks = $query->with('children')->get();
+        $tasks = $query->get();
 
         return response()->json($tasks);
     }
@@ -58,6 +58,9 @@ class TaskController extends Controller
             }
         }
 
+        // Prevent cycles: a task cannot be its own ancestor
+        // (Not needed on store, as the task does not exist yet)
+
         $task = Task::create([
             'user_id' => Auth::id(),
             'parent_id' => $validated['parent_id'] ?? null,
@@ -80,8 +83,8 @@ class TaskController extends Controller
             return response()->json(['error' => 'Not authorized.'], 403);
         }
 
-        // Optionally load children
-        $task->load('children');
+        // Load all recursive children (subtasks tree)
+        $task->load('childrenRecursive');
 
         return response()->json($task);
     }
@@ -113,6 +116,15 @@ class TaskController extends Controller
             if (!$parent) {
                 return response()->json(['error' => 'Invalid parent task.'], 422);
             }
+            // Prevent cycles: a task cannot be its own ancestor or descendant
+            if ($validated['parent_id'] == $task->id) {
+                return response()->json(['error' => 'A task cannot be its own parent.'], 422);
+            }
+            // Check if the new parent is a descendant of this task (which would create a cycle)
+            $descendantIds = $this->getAllDescendantIds($task);
+            if (in_array($validated['parent_id'], $descendantIds)) {
+                return response()->json(['error' => 'A task cannot be assigned as a child of its own descendant.'], 422);
+            }
         }
 
         $task->update($validated);
@@ -143,5 +155,18 @@ class TaskController extends Controller
             ->get();
 
         return response()->json($tasks);
+    }
+
+    /**
+     * Helper to get all descendant IDs of a task recursively
+     */
+    private function getAllDescendantIds(Task $task)
+    {
+        $ids = [];
+        foreach ($task->children as $child) {
+            $ids[] = $child->id;
+            $ids = array_merge($ids, $this->getAllDescendantIds($child));
+        }
+        return $ids;
     }
 }

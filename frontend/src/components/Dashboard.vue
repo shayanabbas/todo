@@ -24,7 +24,7 @@
     />
 
     <!-- Kanban Board -->
-    <div v-if="loading" class="text-gray-500 dark:text-gray-300 text-center py-10">Loading tasks...</div>
+    <div v-if="loading && !tasks.length" class="text-gray-500 dark:text-gray-300 text-center py-10">Loading tasks...</div>
     <div v-else-if="error" class="text-red-500 dark:text-red-400 text-center py-10">{{ error }}</div>
     <div v-else class="flex flex-wrap gap-8 justify-start">
       <TaskColumn

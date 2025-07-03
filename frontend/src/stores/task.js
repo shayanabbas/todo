@@ -5,6 +5,7 @@ import { useAsyncState } from '../composables/useAsyncState';
 export const useTaskStore = defineStore('task', {
   state: () => ({
     tasks: [],
+    taskTree: [],
   }),
   actions: {
     // Attach async state to the store instance
@@ -48,6 +49,12 @@ export const useTaskStore = defineStore('task', {
       await run(async () => {
         await api.deleteTask(id);
         this.tasks = this.tasks.filter(t => t.id !== id);
+      });
+    },
+    async fetchTaskTree() {
+      const { run } = this.initAsyncState();
+      await run(async () => {
+        this.taskTree = await api.fetchTaskTree();
       });
     },
   },

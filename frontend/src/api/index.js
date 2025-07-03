@@ -51,6 +51,10 @@ export default {
   async deleteTask(id) {
     await api.delete(`/tasks/${id}`);
   },
+  async fetchTaskTree() {
+    const { data } = await api.get('/tasks-tree');
+    return data;
+  },
 
   // Profile
   async getProfile() {

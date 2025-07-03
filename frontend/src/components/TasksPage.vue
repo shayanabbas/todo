@@ -21,22 +21,12 @@
       @submit="handleEditTaskSubmit"
     />
     <div class="flex justify-between items-center mb-8">
-      <h2 class="text-2xl font-bold">Upcoming tasks</h2>
+      <h2 class="text-2xl font-bold">All Tasks</h2>
     </div>
-    <TaskList
-      :tasks="upcomingTasks"
-      @edit="openEditModal"
-      @complete="taskStore.toggleComplete"
-      @delete="taskStore.deleteTask"
-    />
-    <div class="mt-12">
-      <h2 class="text-2xl font-bold mb-4">Completed tasks</h2>
-      <TaskList
-        :tasks="completedTasks"
-        @edit="openEditModal"
-        @complete="taskStore.toggleComplete"
-        @delete="taskStore.deleteTask"
-      />
+    <div v-if="loading && !taskTree.length" class="text-gray-500 dark:text-gray-300 text-center py-10">Loading tasks...</div>
+    <div v-else-if="error" class="text-red-500 dark:text-red-400 text-center py-10">{{ error }}</div>
+    <div v-else>
+      <TaskTree :tasks="taskTree" @edit="openEditModal" @add-subtask="handleAddSubtask" />
     </div>
   </div>
 </template>
@@ -49,10 +39,12 @@ import TaskModal from './TaskModal.vue';
 import { Icon } from '@iconify/vue';
 import TaskList from './TaskList.vue';
 import { useTaskModal } from '../composables/useTaskModal';
+import TaskTree from './TaskTree.vue';
 
 const taskStore = useTaskStore();
 const { loading, error } = taskStore.getAsyncState();
 const tasks = taskStore.tasks;
+const taskTree = computed(() => taskStore.taskTree);
 
 const {
   showAddModal,
@@ -71,12 +63,12 @@ const {
 } = useTaskModal(taskStore);
 
 onMounted(() => {
-  if (!tasks.length && !loading.value) taskStore.fetchTasks();
+  taskStore.fetchTaskTree();
 });
 
-// Computed lists for upcoming and completed tasks
-const upcomingTasks = computed(() => tasks.filter(t => !t.completed));
-const completedTasks = computed(() => tasks.filter(t => t.completed));
+function handleAddSubtask(parentTask) {
+  openAddModal({ title: '', labels: [], description: '', priority: 'medium', parent_id: parentTask.id });
+}
 </script>
 
 <style scoped>
