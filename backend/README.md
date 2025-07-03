@@ -30,7 +30,7 @@ This is the **backend API** for the Todo App, built with Laravel 12 and designed
 
 ```sh
 git clone https://github.com/shayanabbas/todo.git
-cd backend
+cd todo/backend
 ```
 
 ### 2. Install PHP Dependencies

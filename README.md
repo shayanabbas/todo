@@ -7,7 +7,7 @@ This repository contains both the **Laravel 12 backend API** and the **Vue 3 + V
 ## Project Structure
 
 ```
-todoapp/
+todo/
   backend/   # Laravel 12 REST API
   frontend/  # Vue 3 + Vite SPA
 ```
@@ -30,7 +30,7 @@ todoapp/
 
 ```bash
 git clone https://github.com/shayanabbas/todo.git
-cd todoapp
+cd todo
 ```
 
 ---
