@@ -1,0 +1,30 @@
+{
+  "name": "Todo App DevContainer",
+  "dockerComposeFile": "docker-compose.yml",
+  "service": "devcontainer",
+  "workspaceFolder": "/workspaces/todo",
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspaces/todo,type=bind,consistency=cached",
+  "build": {
+    "dockerfile": "Dockerfile",
+    "args": {
+      "GITHUB_REPOSITORY": "shayanabbas/todo",
+      "WORKSPACE_FOLDER": "/workspaces/todo"
+    }
+  },
+  "remoteEnv": {
+    "GITHUB_REPOSITORY": "shayanabbas/todo"
+  },
+  "postCreateCommand": "/bin/bash /workspaces/todo/.devcontainer/init.sh",
+  "forwardPorts": [8080, 5173],
+  "portsAttributes": {
+    "8080": { "label": "Laravel API" },
+    "5173": { "label": "Vue Frontend" }
+  },
+  "settings": {
+    "terminal.integrated.defaultProfile.linux": "bash"
+  },
+  "remoteUser": "vscode",
+  "mounts": [
+    "source=/var/run/docker.sock,target=/var/run/docker.sock,type=bind"
+  ]
+}
